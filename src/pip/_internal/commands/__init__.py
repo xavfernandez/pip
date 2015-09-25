@@ -80,6 +80,10 @@ commands_dict = OrderedDict([
         'pip._internal.commands.debug', 'DebugCommand',
         'Show information useful for debugging.',
     )),
+    ('cache', CommandInfo(
+        'pip._internal.commands.cache', 'CacheCommand',
+        'Show and manage pip cache.',
+    )),
     ('help', CommandInfo(
         'pip._internal.commands.help', 'HelpCommand',
         'Show help for commands.',
