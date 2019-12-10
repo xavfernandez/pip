@@ -7,10 +7,10 @@ import os.path
 from pip._vendor.packaging import version
 from pip._vendor.packaging.utils import canonicalize_name
 from pip._vendor import pkg_resources
-from pip.basecommand import Command, SUCCESS
-from pip.exceptions import InvalidWheelFilename
-from pip.utils import ask, cached_property
-from pip.wheel import Wheel
+from pip._internal.cli.base_command import Command, SUCCESS
+from pip._internal.utils.misc import ask, cached_property
+from pip._internal.exceptions import InvalidWheelFilename
+from pip._internal.models.wheel import Wheel
 
 
 logger = logging.getLogger(__name__)
@@ -99,7 +99,7 @@ class CacheCommand(Command):
         self.parser.insert_option_group(0, self.cmd_opts)
 
     def run(self, options, args):
-        reqs = map(pkg_resources.Requirement.parse, args)
+        reqs = [pkg_resources.Requirement.parse(arg) for arg in args]
 
         records = []
         for dirpath, dirnames, filenames in os.walk(
@@ -124,6 +124,7 @@ class CacheCommand(Command):
         if reqs:
             records = filter(lambda r: r.match_reqs(reqs), records)
 
+        records = list(records)
         if options.remove:
             wheel_paths = [record.file_path for record in records]
             logger.info('Deleting:\n- %s' % '\n- '.join(wheel_paths))
@@ -152,9 +153,8 @@ def sort_key(record):
 
 
 def log_results(records):
-    records.sort(key=sort_key)
     current_name = None
-    for record in records:
+    for record in sorted(records, key=sort_key):
         if record.wheel.name != current_name:
             current_name = record.wheel.name
             logger.info(current_name)
