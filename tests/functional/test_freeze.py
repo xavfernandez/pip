@@ -76,8 +76,14 @@ def test_basic_freeze(script):
 
 def test_freeze_with_pip(script):
     """Test pip shows itself"""
-    result = script.pip('freeze', '--all')
+    result = script.pip('freeze')
     assert 'pip==' in result.stdout
+
+
+def test_freeze_all_deprecated(script):
+    """Test that using --all option produces a warning"""
+    result = script.pip('freeze', '--all', expect_stderr=True)
+    assert '--all is now the default behavior and does nothing' in result.stderr
 
 
 def test_freeze_with_invalid_names(script):
